@@ -35,5 +35,12 @@ class TestStringCalculator(unittest.TestCase):
         self.assertEqual(55, self.calculator.add("1,2,3,4,5,6,7,8,9,10"))
 
 
+    def test_newline_as_delimiter(self):
+        """Test that newlines can be used as delimiters, just like commas."""
+        self.assertEqual(6, self.calculator.add("1\n2,3"))
+        self.assertEqual(10, self.calculator.add("4\n6"))
+        self.assertEqual(15, self.calculator.add("1\n2\n3,4,5"))
+
+
 if __name__ == "__main__":
     unittest.main()
