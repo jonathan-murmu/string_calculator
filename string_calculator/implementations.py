@@ -113,3 +113,57 @@ class NegativeNumberValidator(INumberValidator):
         if negative_numbers:
             negative_numbers_str = ", ".join(str(num) for num in negative_numbers)
             raise ValueError(f"negative numbers not allowed: {negative_numbers_str}")
+        
+
+class UpperLimitNumberValidator(INumberValidator):
+    """
+    Validator that filters out numbers greater than 1000.
+    """
+    
+    def __init__(self, upper_limit=1000):
+        """
+        Initialize the validator with an upper limit.
+        
+        Args:
+            upper_limit (int, optional): The upper limit for numbers. Defaults to 1000.
+        """
+        self.upper_limit = upper_limit
+    
+    def validate(self, numbers: List[int]) -> None:
+        """
+        This validator doesn't raise exceptions but is meant to be used
+        to filter numbers in the calculator.
+        
+        Args:
+            numbers (List[int]): The list of numbers to validate.
+        """
+        # This validator doesn't raise exceptions
+        pass
+
+
+class CompositeValidator(INumberValidator):
+    """
+    A validator that combines multiple validators.
+    """
+    
+    def __init__(self, validators: List[INumberValidator]):
+        """
+        Initialize with a list of validators.
+        
+        Args:
+            validators (List[INumberValidator]): The validators to use.
+        """
+        self.validators = validators
+    
+    def validate(self, numbers: List[int]) -> None:
+        """
+        Run all validators on the numbers.
+        
+        Args:
+            numbers (List[int]): The list of numbers to validate.
+            
+        Raises:
+            ValueError: If any validator raises an exception.
+        """
+        for validator in self.validators:
+            validator.validate(numbers)

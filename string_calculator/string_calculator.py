@@ -8,7 +8,9 @@ from string_calculator.implementations import (
     DefaultInputParser,
     StandardDelimiterStrategy,
     CustomDelimiterStrategy,
-    NegativeNumberValidator
+    NegativeNumberValidator,
+    UpperLimitNumberValidator,
+    CompositeValidator
 )
 
 
@@ -44,9 +46,11 @@ class StringCalculator:
             custom_strategy = CustomDelimiterStrategy()
             parser = DefaultInputParser(standard_strategy, custom_strategy)
         
-        # If no validator is provided, create a default one
+        # If no validator is provided, create a composite validator
         if validator is None:
-            validator = NegativeNumberValidator()
+            negative_validator = NegativeNumberValidator()
+            upper_limit_validator = UpperLimitNumberValidator()
+            validator = CompositeValidator([negative_validator, upper_limit_validator])
         
         self.parser = parser
         self.validator = validator
@@ -72,4 +76,7 @@ class StringCalculator:
         # Validate numbers
         self.validator.validate(numbers)
         
-        return sum(numbers)
+        # Filter out numbers greater than 1000
+        filtered_numbers = [num for num in numbers if num <= 1000]
+        
+        return sum(filtered_numbers)
