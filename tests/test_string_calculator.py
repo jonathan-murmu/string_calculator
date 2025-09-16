@@ -50,5 +50,20 @@ class TestStringCalculator(unittest.TestCase):
         self.assertEqual(15, self.calculator.add("//.\n1.2.3.4.5"))
 
 
+    def test_negative_numbers_not_allowed_single(self):
+        """Test that an exception is thrown when a negative number is provided."""
+        with self.assertRaises(ValueError) as context:
+            self.calculator.add("-1,2")
+        
+        self.assertEqual("negative numbers not allowed: -1", str(context.exception))
+
+    def test_negative_numbers_not_allowed_multiple(self):
+        """Test that an exception is thrown when multiple negative numbers are provided."""
+        with self.assertRaises(ValueError) as context:
+            self.calculator.add("-1,-2,3")
+        
+        self.assertEqual("negative numbers not allowed: -1, -2", str(context.exception))
+
+
 if __name__ == "__main__":
     unittest.main()

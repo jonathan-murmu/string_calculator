@@ -58,5 +58,26 @@ class StringCalculator:
         # Parse the input to get the delimiter and the numbers string
         delimiter, parsed_numbers_str = self._parse_input(numbers_str)
         
-        # Split by the delimiter and sum the numbers
-        return sum(int(num) for num in parsed_numbers_str.split(delimiter))
+        # Split by the delimiter and convert to integers
+        numbers = [int(num) for num in parsed_numbers_str.split(delimiter)]
+        
+        # Validate numbers
+        self._validate_numbers(numbers)
+        
+        return sum(numbers)
+    
+    def _validate_numbers(self, numbers):
+        """
+        Validate the numbers according to the rules.
+        
+        Args:
+            numbers (list): List of integers to validate.
+            
+        Raises:
+            ValueError: If any validation rule is violated.
+        """
+        # Check for negative numbers
+        negative_numbers = [num for num in numbers if num < 0]
+        if negative_numbers:
+            negative_numbers_str = ", ".join(str(num) for num in negative_numbers)
+            raise ValueError(f"negative numbers not allowed: {negative_numbers_str}")
