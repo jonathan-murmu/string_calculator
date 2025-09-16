@@ -28,5 +28,12 @@ class TestStringCalculator(unittest.TestCase):
         self.assertEqual(10, self.calculator.add("7,3"))
 
 
+    def test_multiple_numbers_returns_sum(self):
+        """Test that multiple numbers separated by commas return their sum."""
+        self.assertEqual(6, self.calculator.add("1,2,3"))
+        self.assertEqual(15, self.calculator.add("1,2,3,4,5"))
+        self.assertEqual(55, self.calculator.add("1,2,3,4,5,6,7,8,9,10"))
+
+
 if __name__ == "__main__":
     unittest.main()

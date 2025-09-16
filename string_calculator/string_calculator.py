@@ -26,5 +26,5 @@ class StringCalculator:
         if not numbers_str:
             return 0
         
-        # Initial implementation - will be expanded through TDD
+        # Implementation handles any number of comma-separated values
         return sum(int(num) for num in numbers_str.split(','))
