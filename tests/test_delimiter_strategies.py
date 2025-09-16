@@ -57,5 +57,32 @@ class TestCustomDelimiterStrategy(unittest.TestCase):
         self.assertEqual('1;2;3', numbers_str)
 
 
+class TestLongDelimiterStrategy(unittest.TestCase):
+    """Test cases for the LongDelimiterStrategy class."""
+
+    def setUp(self):
+        """Set up a new LongDelimiterStrategy instance for each test."""
+        from string_calculator.implementations import LongDelimiterStrategy
+        self.strategy = LongDelimiterStrategy()
+
+    def test_extract_delimiter_and_numbers_long_delimiter(self):
+        """Test extraction with a long delimiter enclosed in square brackets."""
+        delimiter, numbers_str = self.strategy.extract_delimiter_and_numbers("//[***]\n1***2***3")
+        self.assertEqual('***', delimiter)
+        self.assertEqual('1***2***3', numbers_str)
+
+    def test_extract_delimiter_and_numbers_multiple_characters(self):
+        """Test extraction with a delimiter containing multiple different characters."""
+        delimiter, numbers_str = self.strategy.extract_delimiter_and_numbers("//[==;]\n1==;2==;3")
+        self.assertEqual('==;', delimiter)
+        self.assertEqual('1==;2==;3', numbers_str)
+
+    def test_extract_delimiter_and_numbers_with_newlines(self):
+        """Test extraction with newlines in the numbers part."""
+        delimiter, numbers_str = self.strategy.extract_delimiter_and_numbers("//[***]\n1***2\n3")
+        self.assertEqual('***', delimiter)
+        self.assertEqual('1***2***3', numbers_str)
+
+
 if __name__ == "__main__":
     unittest.main()

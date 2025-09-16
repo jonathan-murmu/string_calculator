@@ -55,21 +55,56 @@ class CustomDelimiterStrategy(IDelimiterStrategy):
         return ',', input_str
 
 
+class LongDelimiterStrategy(IDelimiterStrategy):
+    """
+    Long delimiter strategy that extracts a multi-character delimiter enclosed in square brackets.
+    """
+    
+    def extract_delimiter_and_numbers(self, input_str: str) -> Tuple[str, str]:
+        """
+        Extract the long delimiter and numbers string from the input.
+        
+        Args:
+            input_str (str): The input string to process, in the format "//[delimiter]\n[numbers]".
+            
+        Returns:
+            Tuple[str, str]: A tuple containing (delimiter, numbers_str)
+        """
+        # Find the positions of the brackets and newline
+        open_bracket = input_str.find('[')
+        close_bracket = input_str.find(']')
+        newline = input_str.find('\n')
+        
+        if open_bracket != -1 and close_bracket != -1 and newline != -1:
+            # Extract the delimiter between the brackets
+            delimiter = input_str[open_bracket + 1:close_bracket]
+            # Extract the numbers string after the newline
+            numbers_str = input_str[newline + 1:]
+
+            numbers_str = numbers_str.replace('\n', delimiter)
+            return delimiter, numbers_str
+        
+        return ',', input_str
+
+
 class DefaultInputParser(IInputParser):
     """
     Default implementation of the input parser.
     """
     
-    def __init__(self, standard_strategy: IDelimiterStrategy, custom_strategy: IDelimiterStrategy):
+    def __init__(self, standard_strategy: IDelimiterStrategy, custom_strategy: IDelimiterStrategy,
+                 long_delimiter_strategy: IDelimiterStrategy = None):
         """
         Initialize the parser with delimiter strategies.
         
         Args:
             standard_strategy (IDelimiterStrategy): The strategy for standard delimiters.
             custom_strategy (IDelimiterStrategy): The strategy for custom delimiters.
+            long_delimiter_strategy (IDelimiterStrategy, optional): The strategy for long delimiters.
         """
         self.standard_strategy = standard_strategy
         self.custom_strategy = custom_strategy
+        self.long_delimiter_strategy = long_delimiter_strategy
     
     def parse(self, input_str: str) -> List[int]:
         """
@@ -84,9 +119,13 @@ class DefaultInputParser(IInputParser):
         if not input_str:
             return []
         
-        # Determine which strategy to use based on whether the input has a custom delimiter
+        # Determine which strategy to use based on the input format
         if input_str.startswith('//'):
-            delimiter, numbers_str = self.custom_strategy.extract_delimiter_and_numbers(input_str)
+            # Check if it's a long delimiter format (with square brackets)
+            if '[' in input_str and ']' in input_str and self.long_delimiter_strategy:
+                delimiter, numbers_str = self.long_delimiter_strategy.extract_delimiter_and_numbers(input_str)
+            else:
+                delimiter, numbers_str = self.custom_strategy.extract_delimiter_and_numbers(input_str)
         else:
             delimiter, numbers_str = self.standard_strategy.extract_delimiter_and_numbers(input_str)
         

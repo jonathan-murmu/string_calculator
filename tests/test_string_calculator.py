@@ -72,6 +72,12 @@ class TestStringCalculator(unittest.TestCase):
         self.assertEqual(6, self.calculator.add("1,2,3,1001"))
         self.assertEqual(1006, self.calculator.add("1,2,3,1000"))
 
+    def test_long_delimiter(self):
+        """Test that a long delimiter enclosed in square brackets can be specified."""
+        self.assertEqual(6, self.calculator.add("//[***]\n1***2***3"))
+        self.assertEqual(10, self.calculator.add("//[==]\n2==3==5"))
+        self.assertEqual(15, self.calculator.add("//[::;]\n1::;2::;3::;4::;5"))
+
 
 if __name__ == "__main__":
     unittest.main()
