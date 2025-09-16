@@ -65,5 +65,13 @@ class TestStringCalculator(unittest.TestCase):
         self.assertEqual("negative numbers not allowed: -1, -2", str(context.exception))
 
 
+    def test_numbers_greater_than_1000_are_ignored(self):
+        """Test that numbers greater than 1000 are ignored."""
+        self.assertEqual(2, self.calculator.add("2,1001"))
+        self.assertEqual(1002, self.calculator.add("2,1000"))
+        self.assertEqual(6, self.calculator.add("1,2,3,1001"))
+        self.assertEqual(1006, self.calculator.add("1,2,3,1000"))
+
+
 if __name__ == "__main__":
     unittest.main()

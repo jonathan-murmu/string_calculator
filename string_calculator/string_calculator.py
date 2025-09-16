@@ -1,9 +1,15 @@
 """
 String Calculator module.
 
-This module implements a string calculator that follows the TDD Kata requirements
-using Object-Oriented Programming principles.
+This module implements a string calculator that follows the TDD Kata requirements.
 """
+from string_calculator.interfaces import IInputParser, INumberValidator
+from string_calculator.implementations import (
+    DefaultInputParser,
+    StandardDelimiterStrategy,
+    CustomDelimiterStrategy,
+    NegativeNumberValidator
+)
 
 
 class StringCalculator:
@@ -13,32 +19,37 @@ class StringCalculator:
     This calculator can add numbers provided as a string with various delimiter options:
     - Default delimiters: comma and newline
     - Custom delimiter: specified with the format "//[delimiter]\n"
+    
+    This class follows the Dependency Inversion Principle by depending on abstractions
+    rather than concrete implementations.
     """
     
-    def _parse_input(self, numbers_str):
+    def __init__(
+        self,
+        parser: IInputParser = None,
+        validator: INumberValidator = None
+    ):
         """
-        Parse the input string to extract the delimiter and the numbers.
+        Initialize the StringCalculator with its dependencies.
         
         Args:
-            numbers_str (str): The input string to parse.
-            
-        Returns:
-            tuple: A tuple containing (delimiter, parsed_numbers_str)
+            parser (IInputParser, optional): The parser to use for input strings.
+                Defaults to DefaultInputParser with standard strategies.
+            validator (INumberValidator, optional): The validator to use for numbers.
+                Defaults to NegativeNumberValidator.
         """
-        # Default delimiter
-        delimiter = ','
+        # If no parser is provided, create a default one
+        if parser is None:
+            standard_strategy = StandardDelimiterStrategy()
+            custom_strategy = CustomDelimiterStrategy()
+            parser = DefaultInputParser(standard_strategy, custom_strategy)
         
-        # Check for custom delimiter
-        if numbers_str.startswith('//'):
-            delimiter_end = numbers_str.find('\n')
-            if delimiter_end != -1:
-                delimiter = numbers_str[2:delimiter_end]
-                numbers_str = numbers_str[delimiter_end + 1:]
+        # If no validator is provided, create a default one
+        if validator is None:
+            validator = NegativeNumberValidator()
         
-        # Replace newlines with the delimiter
-        numbers_str = numbers_str.replace('\n', delimiter)
-        
-        return delimiter, numbers_str
+        self.parser = parser
+        self.validator = validator
     
     def add(self, numbers_str):
         """
@@ -55,29 +66,10 @@ class StringCalculator:
         if not numbers_str:
             return 0
         
-        # Parse the input to get the delimiter and the numbers string
-        delimiter, parsed_numbers_str = self._parse_input(numbers_str)
-        
-        # Split by the delimiter and convert to integers
-        numbers = [int(num) for num in parsed_numbers_str.split(delimiter)]
+        # Parse the input to get the numbers
+        numbers = self.parser.parse(numbers_str)
         
         # Validate numbers
-        self._validate_numbers(numbers)
+        self.validator.validate(numbers)
         
         return sum(numbers)
-    
-    def _validate_numbers(self, numbers):
-        """
-        Validate the numbers according to the rules.
-        
-        Args:
-            numbers (list): List of integers to validate.
-            
-        Raises:
-            ValueError: If any validation rule is violated.
-        """
-        # Check for negative numbers
-        negative_numbers = [num for num in numbers if num < 0]
-        if negative_numbers:
-            negative_numbers_str = ", ".join(str(num) for num in negative_numbers)
-            raise ValueError(f"negative numbers not allowed: {negative_numbers_str}")
