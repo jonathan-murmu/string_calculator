@@ -77,6 +77,13 @@ class TestStringCalculator(unittest.TestCase):
         self.assertEqual(6, self.calculator.add("//[***]\n1***2***3"))
         self.assertEqual(10, self.calculator.add("//[==]\n2==3==5"))
         self.assertEqual(15, self.calculator.add("//[::;]\n1::;2::;3::;4::;5"))
+    
+    def test_multiple_delimiters(self):
+        """Test that multiple delimiters can be specified in square brackets."""
+        self.assertEqual(6, self.calculator.add("//[*][%]\n1*2%3"))
+        self.assertEqual(10, self.calculator.add("//[+][;]\n4+3;3"))
+        self.assertEqual(15, self.calculator.add("//[**][%%]\n1**2%%3**4%%5"))
+        self.assertEqual(20, self.calculator.add("//[*][%][#]\n5*5%5#5"))
 
 
 if __name__ == "__main__":

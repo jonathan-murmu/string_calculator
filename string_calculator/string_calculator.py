@@ -9,6 +9,7 @@ from string_calculator.implementations import (
     StandardDelimiterStrategy,
     CustomDelimiterStrategy,
     LongDelimiterStrategy,
+    MultipleDelimiterStrategy,
     NegativeNumberValidator,
     UpperLimitNumberValidator,
     CompositeValidator
@@ -46,7 +47,13 @@ class StringCalculator:
             standard_strategy = StandardDelimiterStrategy()
             custom_strategy = CustomDelimiterStrategy()
             long_delimiter_strategy = LongDelimiterStrategy()
-            parser = DefaultInputParser(standard_strategy, custom_strategy, long_delimiter_strategy)
+            multiple_delimiter_strategy = MultipleDelimiterStrategy()
+            parser = DefaultInputParser(
+                standard_strategy,
+                custom_strategy,
+                long_delimiter_strategy,
+                multiple_delimiter_strategy
+            )
         
         # If no validator is provided, create a composite validator
         if validator is None:

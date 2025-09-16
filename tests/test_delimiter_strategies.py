@@ -84,5 +84,40 @@ class TestLongDelimiterStrategy(unittest.TestCase):
         self.assertEqual('1***2***3', numbers_str)
 
 
+class TestMultipleDelimiterStrategy(unittest.TestCase):
+    """Test cases for the MultipleDelimiterStrategy class."""
+
+    def setUp(self):
+        """Set up a new MultipleDelimiterStrategy instance for each test."""
+        from string_calculator.implementations import MultipleDelimiterStrategy
+        self.strategy = MultipleDelimiterStrategy()
+
+    def test_extract_delimiter_and_numbers_two_delimiters(self):
+        """Test extraction with two delimiters."""
+        delimiter, numbers_str = self.strategy.extract_delimiter_and_numbers("//[*][%]\n1*2%3")
+        # The delimiter is a special marker that will be used for splitting
+        self.assertEqual('__MULTI_DELIM__', delimiter)
+        # The numbers string should have all delimiters replaced with the marker
+        self.assertEqual('1__MULTI_DELIM__2__MULTI_DELIM__3', numbers_str)
+
+    def test_extract_delimiter_and_numbers_three_delimiters(self):
+        """Test extraction with three delimiters."""
+        delimiter, numbers_str = self.strategy.extract_delimiter_and_numbers("//[*][%][#]\n5*5%5#5")
+        self.assertEqual('__MULTI_DELIM__', delimiter)
+        self.assertEqual('5__MULTI_DELIM__5__MULTI_DELIM__5__MULTI_DELIM__5', numbers_str)
+
+    def test_extract_delimiter_and_numbers_multi_char_delimiters(self):
+        """Test extraction with multi-character delimiters."""
+        delimiter, numbers_str = self.strategy.extract_delimiter_and_numbers("//[**][%%]\n1**2%%3")
+        self.assertEqual('__MULTI_DELIM__', delimiter)
+        self.assertEqual('1__MULTI_DELIM__2__MULTI_DELIM__3', numbers_str)
+
+    def test_extract_delimiter_and_numbers_with_newlines(self):
+        """Test extraction with newlines in the numbers part."""
+        delimiter, numbers_str = self.strategy.extract_delimiter_and_numbers("//[*][%]\n1*2\n3%4")
+        self.assertEqual('__MULTI_DELIM__', delimiter)
+        self.assertEqual('1__MULTI_DELIM__2__MULTI_DELIM__3__MULTI_DELIM__4', numbers_str)
+
+
 if __name__ == "__main__":
     unittest.main()

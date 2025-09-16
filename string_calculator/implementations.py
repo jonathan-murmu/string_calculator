@@ -87,13 +87,68 @@ class LongDelimiterStrategy(IDelimiterStrategy):
         return ',', input_str
 
 
+class MultipleDelimiterStrategy(IDelimiterStrategy):
+    """
+    Multiple delimiter strategy that extracts multiple delimiters enclosed in square brackets.
+    """
+    
+    def extract_delimiter_and_numbers(self, input_str: str) -> Tuple[str, str]:
+        """
+        Extract multiple delimiters and numbers string from the input.
+        
+        Args:
+            input_str (str): The input string to process, in the format "//[delimiter1][delimiter2]...[delimiterN]\n[numbers]".
+            
+        Returns:
+            Tuple[str, str]: A tuple containing (special_delimiter, numbers_str)
+                             where all original delimiters are replaced with the special_delimiter
+        """
+        # Special marker to replace all delimiters
+        special_delimiter = "__MULTI_DELIM__"
+        
+        # Find the position of the newline that separates delimiters from numbers
+        newline_pos = input_str.find('\n')
+        if newline_pos == -1:
+            return ',', input_str
+        
+        # Extract the delimiters section and the numbers section
+        delimiters_section = input_str[2:newline_pos]
+        numbers_str = input_str[newline_pos + 1:]
+        
+        # Extract all delimiters enclosed in square brackets
+        delimiters = []
+        start_pos = 0
+        while start_pos < len(delimiters_section):
+            open_bracket = delimiters_section.find('[', start_pos)
+            if open_bracket == -1:
+                break
+                
+            close_bracket = delimiters_section.find(']', open_bracket)
+            if close_bracket == -1:
+                break
+                
+            delimiter = delimiters_section[open_bracket + 1:close_bracket]
+            delimiters.append(delimiter)
+            start_pos = close_bracket + 1
+        
+        # Replace all occurrences of each delimiter with the special delimiter
+        for delimiter in delimiters:
+            numbers_str = numbers_str.replace(delimiter, special_delimiter)
+        
+        # Replace newlines with the special delimiter as well
+        numbers_str = numbers_str.replace('\n', special_delimiter)
+        
+        return special_delimiter, numbers_str
+
+
 class DefaultInputParser(IInputParser):
     """
     Default implementation of the input parser.
     """
     
     def __init__(self, standard_strategy: IDelimiterStrategy, custom_strategy: IDelimiterStrategy,
-                 long_delimiter_strategy: IDelimiterStrategy = None):
+                 long_delimiter_strategy: IDelimiterStrategy = None,
+                 multiple_delimiter_strategy: IDelimiterStrategy = None):
         """
         Initialize the parser with delimiter strategies.
         
@@ -101,10 +156,12 @@ class DefaultInputParser(IInputParser):
             standard_strategy (IDelimiterStrategy): The strategy for standard delimiters.
             custom_strategy (IDelimiterStrategy): The strategy for custom delimiters.
             long_delimiter_strategy (IDelimiterStrategy, optional): The strategy for long delimiters.
+            multiple_delimiter_strategy (IDelimiterStrategy, optional): The strategy for multiple delimiters.
         """
         self.standard_strategy = standard_strategy
         self.custom_strategy = custom_strategy
         self.long_delimiter_strategy = long_delimiter_strategy
+        self.multiple_delimiter_strategy = multiple_delimiter_strategy
     
     def parse(self, input_str: str) -> List[int]:
         """
@@ -121,8 +178,11 @@ class DefaultInputParser(IInputParser):
         
         # Determine which strategy to use based on the input format
         if input_str.startswith('//'):
-            # Check if it's a long delimiter format (with square brackets)
-            if '[' in input_str and ']' in input_str and self.long_delimiter_strategy:
+            # Check if it's a multiple delimiter format (with multiple square brackets)
+            if input_str.count('[') > 1 and input_str.count(']') > 1 and self.multiple_delimiter_strategy:
+                delimiter, numbers_str = self.multiple_delimiter_strategy.extract_delimiter_and_numbers(input_str)
+            # Check if it's a long delimiter format (with single square brackets)
+            elif '[' in input_str and ']' in input_str and self.long_delimiter_strategy:
                 delimiter, numbers_str = self.long_delimiter_strategy.extract_delimiter_and_numbers(input_str)
             else:
                 delimiter, numbers_str = self.custom_strategy.extract_delimiter_and_numbers(input_str)
